@@ -3,7 +3,7 @@ package dev.vini2003.hammer.util.registry.common;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import dev.vini2003.hammer.core.api.common.util.PlayerUtil;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.argument.EntityArgumentType;
@@ -11,7 +11,7 @@ import net.minecraft.server.command.CommandManager;
 
 public class HUEvents {
 	public static void init() {
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(
 					CommandManager.literal("freeze").requires(source -> source.hasPermissionLevel(4)).then(
 							CommandManager.argument("players", EntityArgumentType.players()).executes(context -> {

@@ -2,10 +2,8 @@ package dev.vini2003.hammer.core.api.common.util;
 
 import dev.vini2003.hammer.core.api.client.util.DrawingUtil;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.text.WordUtils;
@@ -31,12 +29,12 @@ public class TextUtil {
 		return 9.0F;
 	}
 	
-	public static LiteralText toLiteralText(String string) {
-		return new LiteralText(string);
+	public static MutableText toLiteralText(String string) {
+		return Text.literal(string);
 	}
 	
-	public static TranslatableText toTranslatableText(String string) {
-		return new TranslatableText(string);
+	public static MutableText toTranslatableText(String string) {
+		return Text.translatable(string);
 	}
 	
 	public static Text getPercentage(Number a, Number b) {

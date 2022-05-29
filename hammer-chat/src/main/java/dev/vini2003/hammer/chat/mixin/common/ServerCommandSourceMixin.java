@@ -25,45 +25,34 @@
 package dev.vini2003.hammer.chat.mixin.common;
 
 import dev.vini2003.hammer.chat.registry.common.HCUuids;
+import org.jetbrains.annotations.Nullable;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.network.MessageSender;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Util;
+import net.minecraft.text.Text;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-
-import java.util.Objects;
-import java.util.UUID;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerCommandSource.class)
 public abstract class ServerCommandSourceMixin {
 	@Shadow
-	@Final
-	private CommandOutput output;
-	
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/command/CommandOutput;sendSystemMessage(Lnet/minecraft/text/Text;Ljava/util/UUID;)V"), method = "sendFeedback")
-	private UUID hammer$chat$sendFeedback$sendSystemMessage(UUID uuid) {
-		if (output instanceof ServerPlayerEntity && Objects.equals(uuid, Util.NIL_UUID)) {
-			return HCUuids.COMMAND_FEEDBACK_UUID;
-		} else {
-			return uuid;
-		}
-	}
-	
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;sendSystemMessage(Lnet/minecraft/text/Text;Ljava/util/UUID;)V"), method = "sendToOps")
-	private UUID hammer$chat$sendToOps$sendSystemMessage(UUID uuid) {
-		return HCUuids.COMMAND_FEEDBACK_UUID;
-	}
-	
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/server/command/CommandOutput;sendSystemMessage(Lnet/minecraft/text/Text;Ljava/util/UUID;)V"), method = "sendError")
-	private UUID hammer$chat$sendError$sendSystemMessage(UUID uuid) {
-		if (output instanceof ServerPlayerEntity && Objects.equals(uuid, Util.NIL_UUID)) {
-			return HCUuids.COMMAND_FEEDBACK_UUID;
-		} else {
-			return uuid;
+	public abstract Text getDisplayName();
+
+	@Shadow
+	@Nullable
+	public abstract Entity getEntity();
+
+	@Inject(method = "getChatMessageSender", at = @At(value = "HEAD"), cancellable = true)
+	private void hammer$chat$getChatMessageSender(CallbackInfoReturnable<MessageSender> cir) {
+		if (this.getEntity() == null) {
+			cir.setReturnValue(new MessageSender(HCUuids.COMMAND_FEEDBACK_UUID, this.getDisplayName()));
 		}
 	}
 }

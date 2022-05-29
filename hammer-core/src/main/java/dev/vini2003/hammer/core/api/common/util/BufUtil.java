@@ -31,7 +31,7 @@ public class BufUtil {
 	}
 	
 	public static <T> void writeRegistryKey(PacketByteBuf buf, RegistryKey<T> value) {
-		buf.writeIdentifier(value.method_41185());
+		buf.writeIdentifier(value.getRegistry());
 		buf.writeIdentifier(value.getValue());
 	}
 	

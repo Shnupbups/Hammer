@@ -4,13 +4,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.Command;
 import dev.vini2003.hammer.chat.registry.common.HCValues;
 import dev.vini2003.hammer.core.api.client.util.InstanceUtil;
-import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
 import java.util.ArrayList;
 
@@ -20,7 +18,7 @@ public class HCEvents {
 				ClientCommandManager.literal("toggle_chat").executes(context -> {
 					HCValues.SHOW_CHAT = !HCValues.SHOW_CHAT;
 					
-					context.getSource().sendFeedback(new TranslatableText("command.hammer.toggle_chat", HCValues.SHOW_CHAT ? "enabled" : "disabled"));
+					context.getSource().sendFeedback(Text.translatable("command.hammer.toggle_chat", HCValues.SHOW_CHAT ? "enabled" : "disabled"));
 					
 					return Command.SINGLE_SUCCESS;
 				})
@@ -30,7 +28,7 @@ public class HCEvents {
 				ClientCommandManager.literal("toggle_feedback").executes(context -> {
 					HCValues.SHOW_FEEDBACK = !HCValues.SHOW_FEEDBACK;
 					
-					context.getSource().sendFeedback(new TranslatableText("command.hammer.toggle_feedback", HCValues.SHOW_FEEDBACK ? "enabled" : "disabled"));
+					context.getSource().sendFeedback(Text.translatable("command.hammer.toggle_feedback", HCValues.SHOW_FEEDBACK ? "enabled" : "disabled"));
 					
 					return Command.SINGLE_SUCCESS;
 				})
@@ -40,7 +38,7 @@ public class HCEvents {
 				ClientCommandManager.literal("toggle_warnings").executes(context -> {
 					HCValues.SHOW_WARNINGS = !HCValues.SHOW_WARNINGS;
 					
-					context.getSource().sendFeedback(new TranslatableText("command.hammer.toggle_warnings", HCValues.SHOW_WARNINGS ? "enabled" : "disabled"));
+					context.getSource().sendFeedback(Text.translatable("command.hammer.toggle_warnings", HCValues.SHOW_WARNINGS ? "enabled" : "disabled"));
 					
 					return Command.SINGLE_SUCCESS;
 				})
@@ -79,26 +77,26 @@ public class HCEvents {
 							var tooltips = new ArrayList<Text>();
 							
 							if (HCValues.SHOW_FEEDBACK) {
-								tooltips.add(new TranslatableText("text.hammer.feedback.warning"));
-								tooltips.add(new TranslatableText("text.hammer.feedback.toggle"));
+								tooltips.add(Text.translatable("text.hammer.feedback.warning"));
+								tooltips.add(Text.translatable("text.hammer.feedback.toggle"));
 							}
 							
 							if (!HCValues.SHOW_CHAT) {
 								if (!tooltips.isEmpty()) {
-									tooltips.add(LiteralText.EMPTY);
+									tooltips.add(Text.empty());
 								}
 								
-								tooltips.add(new TranslatableText("text.hammer.chat.warning"));
-								tooltips.add(new TranslatableText("text.hammer.chat.toggle"));
+								tooltips.add(Text.translatable("text.hammer.chat.warning"));
+								tooltips.add(Text.translatable("text.hammer.chat.toggle"));
 							}
 							
 							if (!HCValues.SHOW_GLOBAL_CHAT) {
 								if (tooltips.isEmpty()) {
-									tooltips.add(LiteralText.EMPTY);
+									tooltips.add(Text.empty());
 								}
 								
-								tooltips.add(new TranslatableText("text.hammer.global_chat.warning"));
-								tooltips.add(new TranslatableText("text.hammer.global_chat.toggle"));
+								tooltips.add(Text.translatable("text.hammer.global_chat.warning"));
+								tooltips.add(Text.translatable("text.hammer.global_chat.toggle"));
 							}
 							
 							

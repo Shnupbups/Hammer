@@ -1,21 +1,21 @@
 package dev.vini2003.hammer.chat.registry.common;
 
 import com.mojang.brigadier.Command;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.command.CommandManager;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 
 public class HCEvents {
 	public static void init() {
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(
 					CommandManager.literal("toggle_global_chat").executes(context -> {
 						HCValues.SHOW_GLOBAL_CHAT = !HCValues.SHOW_GLOBAL_CHAT;
 						
-						context.getSource().sendFeedback(new TranslatableText("command.hammer.toggle_global_chat", HCValues.SHOW_GLOBAL_CHAT ? "enabled" : "disabled"), true);
+						context.getSource().sendFeedback(Text.translatable("command.hammer.toggle_global_chat", HCValues.SHOW_GLOBAL_CHAT ? "enabled" : "disabled"), true);
 						
 						var buf = PacketByteBufs.create();
 						buf.writeBoolean(HCValues.SHOW_GLOBAL_CHAT);
