@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
 import java.util.ArrayList;
 
@@ -49,7 +48,7 @@ public class HCEvents {
 					if (mouseX >= x1 && mouseY >= y1 && mouseX < x1 + size && mouseY < y1 + size) {
 						var tooltips = new ArrayList<Text>();
 						
-						tooltips.add(new TranslatableText("text.hammer.frozen"));
+						tooltips.add(Text.translatable("text.hammer.frozen"));
 						
 						screen.renderTooltip(matrices, tooltips, (int) mouseX, (int) mouseY);
 					}

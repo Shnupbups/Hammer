@@ -35,9 +35,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -91,9 +89,7 @@ public class HCEvents {
 					
 					DrawableHelper.drawTexture(matrices, HCValues.HUD_ICON_X, scaledHeight - 5 - size + yOffset, size, size, 0.0F, 0.0F, 16, 16, 16, 16);
 					
-					if (!client.mouse.isCursorLocked() && client.currentScreen instanceof ChatScreen) {
-						var screen = (ChatScreen) client.currentScreen;
-						
+					if (!client.mouse.isCursorLocked() && client.currentScreen instanceof ChatScreen screen) {
 						var mouseX = client.mouse.getX() * scaledWidth / window.getWidth();
 						var mouseY = client.mouse.getY() * scaledHeight / window.getHeight();
 						
@@ -101,28 +97,33 @@ public class HCEvents {
 							var tooltips = new ArrayList<Text>();
 							
 							if (ChatUtil.shouldShowCommandFeedback(client.player)) {
-								tooltips.add(new TranslatableText("text.hammer.feedback.warning"));
-								tooltips.add(new TranslatableText("text.hammer.feedback.toggle"));
+								tooltips.add(Text.translatable("text.hammer.feedback.warning"));
+								tooltips.add(Text.translatable("text.hammer.feedback.toggle"));
 							}
 							
 							if (!ChatUtil.shouldShowChat(client.player)) {
 								if (!tooltips.isEmpty()) {
-									tooltips.add(LiteralText.EMPTY);
+									tooltips.add(Text.empty());
 								}
 								
-								tooltips.add(new TranslatableText("text.hammer.chat.warning"));
-								tooltips.add(new TranslatableText("text.hammer.chat.toggle"));
+								tooltips.add(Text.translatable("text.hammer.chat.warning"));
+								tooltips.add(Text.translatable("text.hammer.chat.toggle"));
 							}
 							
 							if (!ChatUtil.shouldShowGlobalChat(client.player)) {
 								if (!tooltips.isEmpty()) {
-									tooltips.add(LiteralText.EMPTY);
+									tooltips.add(Text.empty());
 								}
 								
-								tooltips.add(new TranslatableText("text.hammer.global_chat.warning"));
-								tooltips.add(new TranslatableText("text.hammer.global_chat.toggle"));
+								tooltips.add(Text.translatable("text.hammer.global_chat.warning"));
+								tooltips.add(Text.translatable("text.hammer.global_chat.toggle"));
 							}
-							
+
+							if (!tooltips.isEmpty()) {
+								tooltips.add(Text.empty());
+
+								tooltips.add(Text.translatable("text.hammer.warnings.toggle"));
+							}
 							
 							screen.renderTooltip(matrices, tooltips, (int) mouseX, (int) mouseY);
 						}
@@ -171,16 +172,14 @@ public class HCEvents {
 				
 				HCValues.HUD_ICON_X += 16 + 5;
 				
-				if (!client.mouse.isCursorLocked() && client.currentScreen instanceof ChatScreen) {
-					var screen = (ChatScreen) client.currentScreen;
-					
+				if (!client.mouse.isCursorLocked() && client.currentScreen instanceof ChatScreen screen) {
 					var mouseX = client.mouse.getX() * scaledWidth / window.getWidth();
 					var mouseY = client.mouse.getY() * scaledHeight / window.getHeight();
 					
 					if (mouseX >= x1 && mouseY >= y1 && mouseX < x1 + size && mouseY < y1 + size) {
 						var tooltips = new ArrayList<Text>();
 						
-						tooltips.add(new TranslatableText("text.hammer.muted"));
+						tooltips.add(Text.translatable("text.hammer.muted"));
 						
 						screen.renderTooltip(matrices, tooltips, (int) mouseX, (int) mouseY);
 					}

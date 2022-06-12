@@ -24,6 +24,8 @@
 
 package dev.vini2003.hammer.chat.registry.common;
 
+import java.util.Collection;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -31,16 +33,17 @@ import dev.vini2003.hammer.chat.api.common.channel.Channel;
 import dev.vini2003.hammer.chat.api.common.manager.ChannelManager;
 import dev.vini2003.hammer.chat.api.common.util.ChannelUtil;
 import dev.vini2003.hammer.chat.api.common.util.ChatUtil;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.CommandManager;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
+import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 
 public class HCCommands {
 	public static void init() {
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			var channelNode = CommandManager.literal("channel");
 			
 			var channelJoinNode = CommandManager.literal("join").requires(source -> {
@@ -146,7 +149,13 @@ public class HCCommands {
 			var channelDeleteNode = CommandManager.literal("delete").requires(source -> {
 				return source.hasPermissionLevel(4);
 			}).then(
-					CommandManager.argument("channel_name", StringArgumentType.word()).executes(context -> {
+					CommandManager.argument("channel_name", StringArgumentType.word()).suggests((context, builder) -> {
+						for (var channel : ChannelManager.channels()) {
+							builder.suggest(channel.getName());
+						}
+
+						return builder.buildFuture();
+					}).executes(context -> {
 						var channelName = StringArgumentType.getString(context, "channel_name");
 						var channel = ChannelManager.getChannelByName(channelName);
 						
@@ -162,7 +171,7 @@ public class HCCommands {
 					var player = source.getPlayer();
 					
 					for (var channel : ChannelManager.channels()) {
-						if (channel.isIn(player)) {
+						if (!channel.isIn(player)) {
 							builder.suggest(channel.getName());
 						}
 					}
@@ -180,7 +189,7 @@ public class HCCommands {
 							var players = EntityArgumentType.getPlayers(context, "players");
 							
 							for (var player : players) {
-								source.sendFeedback(new TranslatableText("text.hammer.channel.select.other", new LiteralText("#" + channel.getName()).formatted(Formatting.DARK_GRAY), player.getDisplayName()), false);
+								source.sendFeedback(Text.translatable("text.hammer.channel.select.other", Text.literal("#" + channel.getName()).formatted(Formatting.DARK_GRAY), player.getDisplayName()), false);
 								
 								ChannelUtil.setSelected(player, channel);
 							}
@@ -195,7 +204,7 @@ public class HCCommands {
 					var channel = ChannelManager.getChannelByName(channelName);
 					
 					if (channel != null) {
-						source.sendFeedback(new TranslatableText("text.hammer.channel.select.self", new LiteralText("#" + channel.getName()).formatted(Formatting.DARK_GRAY)), false);
+						source.sendFeedback(Text.translatable("text.hammer.channel.select.self", Text.literal("#" + channel.getName()).formatted(Formatting.DARK_GRAY)), false);
 						
 						ChannelUtil.setSelected(player, channel);
 					}
@@ -203,17 +212,31 @@ public class HCCommands {
 					return Command.SINGLE_SUCCESS;
 				})
 			);
+
+			var channelListNode = CommandManager.literal("list").executes(context -> {
+				var source = context.getSource();
+
+				var channels = ChannelManager.channels();
+				if (channels.isEmpty()) {
+					source.sendFeedback(Text.translatable("text.hammer.channel.list.empty"), false);
+				} else {
+					source.sendFeedback(Text.translatable("text.hammer.channel.list.success", channels.size(), Texts.join(channels, (channel) -> Text.literal(channel.getName()))), false);
+				}
+
+				return Command.SINGLE_SUCCESS;
+			});
 			
 			channelNode.then(channelJoinNode);
 			channelNode.then(channelLeaveNode);
 			channelNode.then(channelCreateNode);
 			channelNode.then(channelDeleteNode);
 			channelNode.then(channelSelectNode);
+			channelNode.then(channelListNode);
 			
 			dispatcher.register(channelNode);
 		});
 		
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(
 					CommandManager.literal("show_global_chat").then(
 							CommandManager.argument("state", BoolArgumentType.bool()).then(
@@ -228,7 +251,7 @@ public class HCCommands {
 										for (var player : players) {
 											ChatUtil.setShowGlobalChat(player, state);
 											
-											source.sendFeedback(new TranslatableText("command.hammer.show_global_chat.other", state ? "enabled" : "disabled", player.getDisplayName()), true);
+											source.sendFeedback(Text.translatable("command.hammer.show_global_chat.other", state ? "enabled" : "disabled", player.getDisplayName()), true);
 										}
 										
 										return Command.SINGLE_SUCCESS;
@@ -240,7 +263,7 @@ public class HCCommands {
 								
 								ChatUtil.setShowGlobalChat(context.getSource().getPlayer(), state);
 								
-								source.sendFeedback(new TranslatableText("command.hammer.show_global_chat.self", state ? "enabled" : "disabled"), true);
+								source.sendFeedback(Text.translatable("command.hammer.show_global_chat.self", state ? "enabled" : "disabled"), true);
 								
 								return Command.SINGLE_SUCCESS;
 							})
@@ -248,7 +271,7 @@ public class HCCommands {
 			);
 		});
 		
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(
 					CommandManager.literal("show_chat").then(
 							CommandManager.argument("state", BoolArgumentType.bool()).then(
@@ -263,7 +286,7 @@ public class HCCommands {
 										for (var player : players) {
 											ChatUtil.setShowChat(player, state);
 											
-											source.sendFeedback(new TranslatableText("command.hammer.show_chat.other", state ? "enabled" : "disabled", player.getDisplayName()), true);
+											source.sendFeedback(Text.translatable("command.hammer.show_chat.other", state ? "enabled" : "disabled", player.getDisplayName()), true);
 										}
 										
 										return Command.SINGLE_SUCCESS;
@@ -275,7 +298,7 @@ public class HCCommands {
 								
 								ChatUtil.setShowChat(context.getSource().getPlayer(), state);
 								
-								source.sendFeedback(new TranslatableText("command.hammer.show_chat.self", state ? "enabled" : "disabled"), true);
+								source.sendFeedback(Text.translatable("command.hammer.show_chat.self", state ? "enabled" : "disabled"), true);
 								
 								return Command.SINGLE_SUCCESS;
 							})
@@ -283,7 +306,7 @@ public class HCCommands {
 			);
 		});
 		
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(
 					CommandManager.literal("show_command_feedback").then(
 							CommandManager.argument("state", BoolArgumentType.bool()).then(
@@ -298,7 +321,7 @@ public class HCCommands {
 										for (var player : players) {
 											ChatUtil.setShowCommandFeedback(player, state);
 											
-											source.sendFeedback(new TranslatableText("command.hammer.show_command_feedback.other", state ? "enabled" : "disabled", player.getDisplayName()), true);
+											source.sendFeedback(Text.translatable("command.hammer.show_command_feedback.other", state ? "enabled" : "disabled", player.getDisplayName()), true);
 										}
 										
 										return Command.SINGLE_SUCCESS;
@@ -310,7 +333,7 @@ public class HCCommands {
 								
 								ChatUtil.setShowCommandFeedback(context.getSource().getPlayer(), state);
 								
-								source.sendFeedback(new TranslatableText("command.hammer.show_command_feedback.self", state ? "enabled" : "disabled"), true);
+								source.sendFeedback(Text.translatable("command.hammer.show_command_feedback.self", state ? "enabled" : "disabled"), true);
 								
 								return Command.SINGLE_SUCCESS;
 							})
@@ -318,7 +341,7 @@ public class HCCommands {
 			);
 		});
 		
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			dispatcher.register(
 					CommandManager.literal("show_warnings").then(
 							CommandManager.argument("state", BoolArgumentType.bool()).then(
@@ -333,7 +356,7 @@ public class HCCommands {
 										for (var player : players) {
 											ChatUtil.setShowWarnings(player, state);
 											
-											source.sendFeedback(new TranslatableText("command.hammer.show_warnings.other", state ? "enabled" : "disabled", player.getDisplayName()), true);
+											source.sendFeedback(Text.translatable("command.hammer.show_warnings.other", state ? "enabled" : "disabled", player.getDisplayName()), true);
 										}
 										
 										return Command.SINGLE_SUCCESS;
@@ -345,7 +368,7 @@ public class HCCommands {
 								
 								ChatUtil.setShowWarnings(context.getSource().getPlayer(), state);
 								
-								source.sendFeedback(new TranslatableText("command.hammer.show_warnings.self", state ? "enabled" : "disabled"), true);
+								source.sendFeedback(Text.translatable("command.hammer.show_warnings.self", state ? "enabled" : "disabled"), true);
 								
 								return Command.SINGLE_SUCCESS;
 							})

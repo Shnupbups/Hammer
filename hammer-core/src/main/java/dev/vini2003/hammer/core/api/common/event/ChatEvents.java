@@ -26,11 +26,12 @@ package dev.vini2003.hammer.core.api.common.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.network.MessageType;
+import net.minecraft.network.message.MessageType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.registry.RegistryKey;
 
 import java.util.UUID;
 
@@ -65,6 +66,6 @@ public interface ChatEvents {
 	
 	@FunctionalInterface
 	interface SendMessage {
-		TypedActionResult<Text> send(ServerPlayerEntity receiver, Text message, MessageType type, UUID sender);
+		TypedActionResult<Text> send(ServerPlayerEntity receiver, Text message, RegistryKey<MessageType> typeKey, UUID sender);
 	}
 }

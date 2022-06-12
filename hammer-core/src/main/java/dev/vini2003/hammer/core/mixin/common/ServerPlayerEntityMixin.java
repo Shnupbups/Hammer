@@ -26,12 +26,14 @@ package dev.vini2003.hammer.core.mixin.common;
 
 import dev.vini2003.hammer.core.api.common.event.ChatEvents;
 import io.netty.util.concurrent.Future;
-import net.minecraft.network.MessageType;
+import net.minecraft.network.message.MessageType;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.registry.RegistryKey;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,31 +42,31 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.UUID;
-
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin {
 	@Shadow
 	public ServerPlayNetworkHandler networkHandler;
-	
 	@Shadow
-	protected abstract boolean acceptsMessage(MessageType type);
-	
+	protected abstract boolean acceptsMessage(RegistryKey<MessageType> typeKey);
 	@Shadow
 	@Final
 	public MinecraftServer server;
-	
-	@Inject(at = @At("HEAD"), method = "sendMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V", cancellable = true)
-	private void hammer$sendMessage(Text message, MessageType type, UUID sender, CallbackInfo ci) {
-		if (type == MessageType.CHAT && server.getPlayerManager().getPlayer(sender) != null && acceptsMessage(type)) {
+
+	@Shadow
+	protected abstract int getMessageTypeId(RegistryKey<MessageType> typeKey);
+
+	@Inject(at = @At("HEAD"), method = "sendMessage(Lnet/minecraft/text/Text;Lnet/minecraft/util/registry/RegistryKey;)V", cancellable = true)
+	private void hammer$sendMessage(Text message, RegistryKey<MessageType> typeKey, CallbackInfo ci) {
+		if (typeKey.equals(MessageType.CHAT) && acceptsMessage(typeKey)) {
 			try {
-				var result = ChatEvents.SEND_MESSAGE.invoker().send((ServerPlayerEntity) (Object) this, message, type, sender);
+				var result = ChatEvents.SEND_MESSAGE.invoker().send((ServerPlayerEntity) (Object) this, message, typeKey, null);
 
 				if (result.getResult().isAccepted()) {
-					networkHandler.sendPacket(new GameMessageS2CPacket(result.getValue(), type, sender), Future::isSuccess);
+					networkHandler.sendPacket(new GameMessageS2CPacket(result.getValue(), getMessageTypeId(typeKey)), Future::isSuccess);
 				}
 				
 				ci.cancel();
-			} catch (Exception exception) {
+			} catch (Exception ignored) {
 			}
 		}
 	}

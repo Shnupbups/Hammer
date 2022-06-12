@@ -168,8 +168,8 @@ public abstract class BaseScreenHandler extends ScreenHandler implements WidgetC
 		slots.remove(id);
 		
 		for (var otherSlot : slots) {
-			if (slot.id >= slot.id) {
-				slot.id -= 1;
+			if (otherSlot.id >= slot.id) {
+				otherSlot.id -= 1;
 			}
 		}
 	}

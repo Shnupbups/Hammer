@@ -32,11 +32,11 @@ pluginManagement {
 rootProject.name = "hammer"
 
 include "hammer-core"
-include "hammer-adventure"
+// include "hammer-adventure"
 include "hammer-chat"
 include "hammer-border"
 include "hammer-emoji"
-include "hammer-permission"
+// include "hammer-permission"
 include "hammer-interaction"
 include "hammer-gravity"
 include "hammer-gui"

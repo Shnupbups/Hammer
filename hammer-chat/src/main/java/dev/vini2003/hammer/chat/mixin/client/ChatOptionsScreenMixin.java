@@ -1,33 +1,27 @@
 package dev.vini2003.hammer.chat.mixin.client;
 
 import dev.vini2003.hammer.chat.registry.common.HCOptions;
+
 import net.minecraft.client.gui.screen.option.ChatOptionsScreen;
-import net.minecraft.client.option.Option;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.client.option.SimpleOption;
+
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(ChatOptionsScreen.class)
 public class ChatOptionsScreenMixin {
-	@Shadow
-	@Final
-	private static Option[] OPTIONS;
-	
-	@Inject(at = @At("TAIL"), method = "<clinit>")
-	private static void hammer$init(CallbackInfo ci) {
-		var prevOptions = OPTIONS;
-		
-		OPTIONS = new Option[OPTIONS.length + 3];
-		
-		for (var i = 0; i < OPTIONS.length - 3; ++i) {
-			OPTIONS[i] = prevOptions[i];
-		}
-		
-		OPTIONS[prevOptions.length] = HCOptions.SHOW_CHAT;
-		OPTIONS[prevOptions.length + 1] = HCOptions.SHOW_COMMAND_FEEDBACK;
-		OPTIONS[prevOptions.length + 2] = HCOptions.SHOW_WARNINGS;
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/option/SimpleOptionsScreen;<init>(Lnet/minecraft/client/gui/screen/Screen;Lnet/minecraft/client/option/GameOptions;Lnet/minecraft/text/Text;[Lnet/minecraft/client/option/SimpleOption;)V"), method = "<init>", index = 3)
+	private static SimpleOption<?>[] hammer$init(SimpleOption<?>[] options) {
+		var prevOptions = options;
+
+		options = new SimpleOption<?>[options.length + 3];
+
+		System.arraycopy(prevOptions, 0, options, 0, options.length - 3);
+
+		options[prevOptions.length] = HCOptions.SHOW_CHAT;
+		options[prevOptions.length + 1] = HCOptions.SHOW_COMMAND_FEEDBACK;
+		options[prevOptions.length + 2] = HCOptions.SHOW_WARNINGS;
+		return options;
 	}
 }

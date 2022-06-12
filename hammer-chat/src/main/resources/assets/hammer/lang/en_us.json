@@ -12,10 +12,16 @@
   "text.hammer.channel.none": "You are not in an any channels",
   "text.hammer.channel.select.self": "Selected channel %s",
   "text.hammer.channel.select.other": "Selected channel %s for %s",
-  "text.hammer.feedback.warning": "Command feedback/errors enabled!",
-  "text.hammer.feedback.toggle": "Use /toggle_feedback to toggle.",
+  "text.hammer.channel.list.empty": "There are no channels",
+  "text.hammer.channel.list.success": "There are %s channels: %s",
+  "text.hammer.feedback.warning": "Command Feedback enabled!",
+  "text.hammer.feedback.toggle": "Use /show_command_feedback to toggle.",
   "text.hammer.chat.warning": "Chat muted!",
-  "text.hammer.chat.toggle": "Use /toggle_chat to toggle.",
+  "text.hammer.chat.toggle": "Use /show_chat to toggle.",
   "text.hammer.global_chat.warning": "Global chat muted!",
-  "text.hammer.global_chat.toggle": "Use /toggle_global_chat to toggle!"
+  "text.hammer.global_chat.toggle": "Use /show_global_chat to toggle!",
+  "text.hammer.warnings.toggle": "Use /show_warnings to toggle this warning!",
+  "options.show_chat": "Show Chat",
+  "options.show_command_feedback": "Show Command Feedback",
+  "options.show_warnings": "Show Warnings"
 }
